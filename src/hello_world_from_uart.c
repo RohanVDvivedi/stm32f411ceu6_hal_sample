@@ -13,6 +13,7 @@ void print_hello_world_from_uart(UART_HandleTypeDef* huart)
 	init_temp(&t, i, msg);
 	char buffer[100];
 	sprintf(buffer, "%s, %d\r\n", t.str, t.s);
+	i++;
 
 	HAL_UART_Transmit(
 		huart,                  /* UART handle */
