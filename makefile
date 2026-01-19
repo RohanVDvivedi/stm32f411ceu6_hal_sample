@@ -64,8 +64,9 @@ LIB += $(addprefix -l, $(patsubst lib%,%, $(basename $(notdir $(LIBRARIES)))))
 # figure out all the sources in the project
 SOURCES:=${shell find ./src -name '*.c'}
 # and the required objects ot be built
-OBJECTS:=$(patsubst %.c,%.o,${SOURCES})
-OBJECTS+=hal.o
+OBJECTS:=$(patsubst ${SRC_DIR}/%.c, ${OBJ_DIR}/%.o, ${SOURCES})
+OBJECTS+=${OBJ_DIR}/hal.o
+OBJECTS+=${OBJ_DIR}/startup.o
 
 # building dependent libraries, using sub make command overriding CC, AR and CFLAGS
 .PHONY: dependencies
@@ -78,11 +79,14 @@ dependencies :
 ${OBJ_DIR} :
 	${MK} $@
 
-hal.o : ./deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c | ${OBJ_DIR}
+${OBJ_DIR}/hal.o : ./deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c | ${OBJ_DIR}
 	${CC} $(CFLAGS) -c $< -o $@
 
 # generate objects from c sources
 ${OBJ_DIR}/%.o : ${SRC_DIR}/%.c | ${OBJ_DIR}
+	${CC} $(CFLAGS) -c $< -o $@
+
+${OBJ_DIR}/startup.o : ./deps/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s | ${OBJ_DIR}
 	${CC} $(CFLAGS) -c $< -o $@
 
 # generate objects from asm sources
