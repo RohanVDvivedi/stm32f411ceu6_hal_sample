@@ -32,7 +32,7 @@ HARD_FPU:=-mfloat-abi=hard
 CCFLAGS:=$(ARCH_FLAGS) ${HARD_FPU} ${OPTIMIZATION} -I./inc -fsingle-precision-constant -flto -ffunction-sections -fdata-sections
 # I am using only single precission floating point constants
 
-# adding HAL header to include dirs
+# adding HAL + CMSIS headers to include dirs
 CCFLAGS += \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/CMSIS/Include \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include \
