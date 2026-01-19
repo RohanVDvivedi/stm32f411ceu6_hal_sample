@@ -54,7 +54,8 @@ SECTIONS
 	.heap :
 	{
 	  . = ALIGN(8);
-	  _hend = .;
+	  /* Newlib expects 'end' symbol for sbrk */
+    end = .;   /* start of heap */
 	} > RAM
 
 	_estack = ORIGIN(RAM) + LENGTH(RAM);
