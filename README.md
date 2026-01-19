@@ -14,7 +14,8 @@ A sample project to show how to build a modular STM32 HAL-supported application 
 
 **Build from source :**
  * `cd stm32f411ceu6_hal_sample`
- * `make clean all`
+ * `make dependencies` *only when you modify a dependency*
+ * `make all` *only when you modify the project source*
 
 **Install from the build :**
  * `make upload` or `make upload-using-uart`
