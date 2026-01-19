@@ -1,8 +1,5 @@
 #include"stm32f4xx.h"               // device header
 #include"stm32f4xx_hal.h"           // main HAL header
-#include"stm32f4xx_hal_gpio.h"      // GPIO types and functions
-#include"stm32f4xx_hal_rcc.h"       // RCC types/functions
-#include"stm32f4xx_hal_uart.h"      // UART types/functions
 
 #include<hello_world_from_uart.h>
 

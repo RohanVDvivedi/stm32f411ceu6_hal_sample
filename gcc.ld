@@ -24,29 +24,21 @@ SECTIONS
 		*(.rodata*)
 		KEEP(*(.init))
 		KEEP(*(.fini))
+		/* Exception handling (required by GCC) */
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    *(.ARM.exidx*)
 		. = ALIGN(4);
 		_etext = .;
 	} > FLASH
 
-  /* Exception handling (required by GCC) */
-  .ARM.extab :
-  {
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-  } > FLASH
-  .ARM.exidx :
-  {
-    __exidx_start = .;
-    *(.ARM.exidx*)
-    __exidx_end = .;
-  } > FLASH
-
 	.data : AT (_etext)
 	{
 		. = ALIGN(4);
-		_sdata = .;
+		_sdata = .;                  /* start of .data in RAM */
+		_sidata = LOADADDR(.data);   /* start of .data in FLASH */
     *(.data*)
     . = ALIGN(4);
-    _edata = .;
+    _edata = .;                  /* end of .data in RAM */
 	} > RAM
 
 	.bss :

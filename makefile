@@ -63,9 +63,15 @@ LIB += $(addprefix -l, $(patsubst lib%,%, $(basename $(notdir $(LIBRARIES)))))
 
 # figure out all the sources in the project
 SOURCES:=${shell find ./src -name '*.c'}
+SRC_HAL_DIR:=./deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src
 # and the required objects ot be built
 OBJECTS:=$(patsubst ${SRC_DIR}/%.c, ${OBJ_DIR}/%.o, ${SOURCES})
-OBJECTS+=${OBJ_DIR}/hal.o
+OBJECTS_FOR_HAL:=stm32f4xx_hal.c stm32f4xx_hal_rcc.c stm32f4xx_hal_rcc_ex.c stm32f4xx_hal_gpio.c stm32f4xx_hal_cortex.c\
+ stm32f4xx_hal_dma.c stm32f4xx_hal_uart.c stm32f4xx_hal_usart.c stm32f4xx_hal_tim.c stm32f4xx_hal_tim_ex.c\
+ stm32f4xx_hal_i2c.c stm32f4xx_hal_i2c_ex.c stm32f4xx_hal_spi.c stm32f4xx_hal_eth.c stm32f4xx_hal_adc.c stm32f4xx_hal_adc_ex.c stm32f4xx_hal_dac.c stm32f4xx_hal_crc.c\
+ stm32f4xx_hal_exti.c stm32f4xx_hal_sd.c
+OBJECTS+=$(patsubst %.c, ${OBJ_DIR}/%.o, ${OBJECTS_FOR_HAL})
+OBJECTS+=${OBJ_DIR}/system.o
 OBJECTS+=${OBJ_DIR}/startup.o
 
 # building dependent libraries, using sub make command overriding CC, AR and CFLAGS
@@ -79,7 +85,10 @@ dependencies :
 ${OBJ_DIR} :
 	${MK} $@
 
-${OBJ_DIR}/hal.o : ./deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c | ${OBJ_DIR}
+${OBJ_DIR}/%.o : ${SRC_HAL_DIR}/%.c | ${OBJ_DIR}
+	${CC} $(CFLAGS) -c $< -o $@
+
+${OBJ_DIR}/system.o : ./deps/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c | ${OBJ_DIR}
 	${CC} $(CFLAGS) -c $< -o $@
 
 # generate objects from c sources
