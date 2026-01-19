@@ -11,7 +11,7 @@ ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # list of all the directories, in the project
 DEPS_DIR:=$(ROOT_DIR)/deps
-INC_DIR:=./inc
+INC_DIR:=$(ROOT_DIR)/inc
 OBJ_DIR:=./obj
 SRC_DIR:=./src
 BIN_DIR:=./bin
@@ -24,14 +24,14 @@ DEPS:=capp
 # no OS to return to baremetal application
 USE_NOHOST:=--specs=nosys.specs
 
-# specify the instruction set to use and the cpu (can not change this)
-ARCH_FLAGS:=-mthumb -mcpu=cortex-m4
+# specify the instruction set to use and the cpu (can not change this), we also specify the microcontroller so that HAL and CMSIS works
+ARCH_FLAGS:=-mthumb -mcpu=cortex-m4 -DSTM32F411xE
 # optimization for code size, use -O(0,1,2,3) for execution performance
 OPTIMIZATION:=-Os
 # use hardware FPU
 HARD_FPU:=-mfloat-abi=hard
 # the final compiler flags
-CFLAGS:=-Wall -Werror $(ARCH_FLAGS) ${HARD_FPU} ${OPTIMIZATION} -I./inc -fsingle-precision-constant -flto -ffunction-sections -fdata-sections
+CFLAGS:=-Wall -Werror $(ARCH_FLAGS) ${HARD_FPU} ${OPTIMIZATION} -I${INC_DIR} -fsingle-precision-constant -flto -ffunction-sections -fdata-sections
 # I am using only single precission floating point constants
 
 # adding HAL + CMSIS headers to include dirs
@@ -41,7 +41,7 @@ CFLAGS += \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc
 
 # adding include dirs from dependencies, these are static files so a ":=" assignement suffices 
-CFLAGS += $(addprefix -I$(DEPS_DIR)/,$(addsuffix /inc,$(DEPENDENCIES)))
+CFLAGS += $(addprefix -I$(DEPS_DIR)/,$(addsuffix /inc,$(DEPS)))
 
 # figure out all the static libraries we need to build with
 LIBRARIES:=$(foreach d,$(DEPS), \
@@ -63,9 +63,9 @@ LIB += $(addprefix -l, $(patsubst lib%,%, $(basename $(notdir $(LIBRARIES)))))
 
 # figure out all the sources in the project
 SOURCES:=${shell find . -name '*.c'}
-SOURCES+=deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
 # and the required objects ot be built
 OBJECTS:=$(patsubst %.c,%.o,${SOURCES})
+OBJECTS+=hal.o
 
 # building dependent libraries, using sub make command overriding CC, AR and CFLAGS
 .PHONY: dependencies
@@ -78,13 +78,16 @@ dependencies :
 ${OBJ_DIR} :
 	${MK} $@
 
+hal.o : ./deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c | ${OBJ_DIR}
+	${CC} $(CFLAGS) -c $< -o $@
+
 # generate objects from c sources
 ${OBJ_DIR}/%.o : ${SRC_DIR}/%.c | ${OBJ_DIR}
-	${CC} $(CCFLAGS) -c $< -o $@
+	${CC} $(CFLAGS) -c $< -o $@
 
 # generate objects from asm sources
 ${OBJ_DIR}/%.o : ${SRC_DIR}/%.S | ${OBJ_DIR}
-	${CC} $(CCFLAGS) -c $< -o $@
+	${CC} $(CFLAGS) -c $< -o $@
 
 # rule to make the directory for storing elf and bin files, that we create
 ${BIN_DIR} :

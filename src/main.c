@@ -1,4 +1,8 @@
-#include"stm32f4xx_hal.h"
+#include "stm32f4xx.h"               // device header
+#include "stm32f4xx_hal.h"           // main HAL header
+#include "stm32f4xx_hal_gpio.h"      // GPIO types and functions
+#include "stm32f4xx_hal_rcc.h"       // RCC types/functions
+#include "stm32f4xx_hal_uart.h"      // UART types/functions
 
 #include<hello_world_from_uart.h>
 
@@ -6,7 +10,7 @@ static void SystemClock_Config(void);
 static void GPIO_Init(void);
 static void UART2_Init(UART_HandleTypeDef* huart2);
 
-void main(void)
+int main(void)
 {
 	HAL_Init();
 
@@ -32,7 +36,7 @@ void main(void)
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
 		// print hello world on UART, blockingly
-		print_hello_world_from_uart();
+		print_hello_world_from_uart(&huart2);
 	}
 }
 
@@ -63,7 +67,7 @@ static void SystemClock_Config(void)
 	clk.APB1CLKDivider = RCC_HCLK_DIV4;
 	clk.APB2CLKDivider = RCC_HCLK_DIV2;
 
-	HAL_RCC_ClockConfig(&clk, FLASH_LATENCY_5);
+	HAL_RCC_ClockConfig(&clk, FLASH_ACR_LATENCY_5WS);
 }
 
 /* ---------------- GPIO ---------------- */
@@ -96,14 +100,14 @@ static void UART2_Init(UART_HandleTypeDef* huart2)
 	gpio.Alternate = GPIO_AF7_USART2;
 	HAL_GPIO_Init(GPIOA, &gpio);
 
-	huart2.Instance          = USART2;
-	huart2.Init.BaudRate     = 115200;
-	huart2.Init.WordLength   = UART_WORDLENGTH_8B;
-	huart2.Init.StopBits     = UART_STOPBITS_1;
-	huart2.Init.Parity       = UART_PARITY_NONE;
-	huart2.Init.Mode         = UART_MODE_TX_RX;
-	huart2.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
-	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+	huart2->Instance          = USART2;
+	huart2->Init.BaudRate     = 115200;
+	huart2->Init.WordLength   = UART_WORDLENGTH_8B;
+	huart2->Init.StopBits     = UART_STOPBITS_1;
+	huart2->Init.Parity       = UART_PARITY_NONE;
+	huart2->Init.Mode         = UART_MODE_TX_RX;
+	huart2->Init.HwFlowCtl    = UART_HWCONTROL_NONE;
+	huart2->Init.OverSampling = UART_OVERSAMPLING_16;
 
-	HAL_UART_Init(&huart2);
+	HAL_UART_Init(huart2);
 }
