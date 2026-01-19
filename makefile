@@ -1,6 +1,7 @@
 CC:=arm-none-eabi-gcc -c
 LD:=arm-none-eabi-gcc #arm-none-eabi-ld
 OC:=arm-none-eabi-objcopy
+AR:=arm-none-eabi-ar rcs
 
 # utility
 RM:=rm -f
@@ -37,22 +38,22 @@ CCFLAGS += \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc
 
-# adding include dirs from dependencies
+# adding include dirs from dependencies, these are static files so a ":=" assignement suffices 
 CCFLAGS += $(addprefix -I$(DEPS_DIR)/,$(addsuffix /inc,$(DEPENDENCIES)))
 
 # figure out all the static libraries we need to build with
-LIBRARIES=$(foreach d,$(DEPS), \
-            $(wildcard $(DEPS_DIR)/$(d)/lib/lib*.a))
+LIBRARIES:=$(foreach d,$(DEPS), \
+                $(wildcard $(DEPS_DIR)/$(d)/lib/lib*.a))
 
 # add this option to LDFLAGS to build the map file along side the executable elf
 MAP:=-Map=./bin/main.map
 # introduce the path to the linker script and the name of the linker script
-LDSCRIPTS=-L. -T gcc.ld
-LDSCRIPTS += $(addprefix -L, $(sort $(dir $(LIBRARIES))))
+LDSCRIPTS:=-L. -T gcc.ld
+LDSCRIPTS+=$(addprefix -L, $(sort $(dir $(LIBRARIES))))
 # remove unused function and data sections
 GC:=-Wl,--gc-sections
 #the final linker flags
-LDFLAGS=$(LDSCRIPTS) $(GC) $(HARD_FPU)
+LDFLAGS:=$(LDSCRIPTS) $(GC) $(HARD_FPU)
 
 # libraries, all of which we are concerned with
 LIB:=-lm
@@ -63,6 +64,10 @@ SOURCES:=${shell find . -name '*.c'}
 SOURCES+=deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
 # and the required objects ot be built
 OBJECTS:=$(patsubst %.c,%.o,${SOURCES})
+
+# building dependent libraries, using sub make command overriding CC, AR and CFLAGS
+dependencies :
+	echo ${DEPS}
 
 # rule to make the directory for storing object files, that we create
 ${OBJ_DIR} :
@@ -87,7 +92,7 @@ main.bin : main.elf
 all : main.bin
 
 clean :
-
+	${RM} -r ${OBJ_DIR} ${BIN_DIR}
 
 # upload command to upload the code to the microcontroller
 upload :
