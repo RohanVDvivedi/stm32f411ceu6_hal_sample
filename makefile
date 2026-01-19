@@ -62,7 +62,7 @@ LIB:=-lm
 LIB += $(addprefix -l, $(patsubst lib%,%, $(basename $(notdir $(LIBRARIES)))))
 
 # figure out all the sources in the project
-SOURCES:=${shell find . -name '*.c'}
+SOURCES:=${shell find ./src -name '*.c'}
 # and the required objects ot be built
 OBJECTS:=$(patsubst %.c,%.o,${SOURCES})
 OBJECTS+=hal.o
@@ -113,7 +113,7 @@ clean_dependencies :
 
 # upload command to upload the code to the microcontroller
 upload :
-	st-flash write main.bin 0x08000000
+	st-flash write ${BIN_DIR}/main.bin 0x08000000
 
 upload-using-uart :
-	stm32flash -w main.bin /dev/ttyUSB0
+	stm32flash -w ${BIN_DIR}/main.bin /dev/ttyUSB0
