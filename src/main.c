@@ -21,13 +21,13 @@ int main(void)
 	UART_HandleTypeDef huart2;
 	UART2_Init(&huart2);
 
-	uint32_t delay_ms = 1000;
+	uint32_t delay_ms = 3000;
 	while(1)
 	{
 		// diminishing delay by a fraction of 0.93, and reset delay if the delay is lesser than 10 ms
 		delay_ms = (uint32_t)(delay_ms * 0.93f);
-		if (delay_ms < 10)
-			delay_ms = 1000;
+		if (delay_ms < 70)
+			delay_ms = 3000;
 
 		// toggle LED
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
