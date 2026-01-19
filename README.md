@@ -10,7 +10,7 @@ A sample project to show how to build a modular STM32 HAL-supported application 
  * No need to worry about the rest, as they would be managed by submodules.
 
 **Download source code :**
- * `git clone https://github.com/RohanVDvivedi/stm32f411ceu6_hal_sample.git`
+ * `git clone --recurse-submodules https://github.com/RohanVDvivedi/stm32f411ceu6_hal_sample.git`
 
 **Build from source :**
  * `cd stm32f411ceu6_hal_sample`
