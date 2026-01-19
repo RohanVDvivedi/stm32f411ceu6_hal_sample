@@ -1,4 +1,4 @@
-CC:=arm-none-eabi-gcc -c
+CC:=arm-none-eabi-gcc
 LD:=arm-none-eabi-gcc #arm-none-eabi-ld
 OC:=arm-none-eabi-objcopy
 AR:=arm-none-eabi-ar rcs
@@ -7,8 +7,10 @@ AR:=arm-none-eabi-ar rcs
 RM:=rm -f
 MK:=mkdir -p
 
+ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
 # list of all the directories, in the project
-DEPS_DIR:=./deps
+DEPS_DIR:=$(ROOT_DIR)/deps
 INC_DIR:=./inc
 OBJ_DIR:=./obj
 SRC_DIR:=./src
@@ -29,17 +31,17 @@ OPTIMIZATION:=-Os
 # use hardware FPU
 HARD_FPU:=-mfloat-abi=hard
 # the final compiler flags
-CCFLAGS:=$(ARCH_FLAGS) ${HARD_FPU} ${OPTIMIZATION} -I./inc -fsingle-precision-constant -flto -ffunction-sections -fdata-sections
+CFLAGS:=-Wall -Werror $(ARCH_FLAGS) ${HARD_FPU} ${OPTIMIZATION} -I./inc -fsingle-precision-constant -flto -ffunction-sections -fdata-sections
 # I am using only single precission floating point constants
 
 # adding HAL + CMSIS headers to include dirs
-CCFLAGS += \
+CFLAGS += \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/CMSIS/Include \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include \
   -I$(DEPS_DIR)/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Inc
 
 # adding include dirs from dependencies, these are static files so a ":=" assignement suffices 
-CCFLAGS += $(addprefix -I$(DEPS_DIR)/,$(addsuffix /inc,$(DEPENDENCIES)))
+CFLAGS += $(addprefix -I$(DEPS_DIR)/,$(addsuffix /inc,$(DEPENDENCIES)))
 
 # figure out all the static libraries we need to build with
 LIBRARIES:=$(foreach d,$(DEPS), \
@@ -66,8 +68,11 @@ SOURCES+=deps/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c
 OBJECTS:=$(patsubst %.c,%.o,${SOURCES})
 
 # building dependent libraries, using sub make command overriding CC, AR and CFLAGS
+.PHONY: dependencies
 dependencies :
-	echo ${DEPS}
+	@for d in $(DEPS); do \
+		$(MAKE) -C $(DEPS_DIR)/$$d CC="$(CC)" AR="$(AR)" CFLAGS="$(CFLAGS)" ./lib/lib$$d.a; \
+	done
 
 # rule to make the directory for storing object files, that we create
 ${OBJ_DIR} :
@@ -75,11 +80,11 @@ ${OBJ_DIR} :
 
 # generate objects from c sources
 %.o : %.c
-	${CC} $(CCFLAGS) $< -o $@
+	${CC} $(CCFLAGS) -c $< -o $@
 
 # generate objects from asm sources
 %.o : %.S
-	${CC} $(CCFLAGS) $< -o $@
+	${CC} $(CCFLAGS) -c $< -o $@
 
 # generate final elf by linking all the object files
 main.elf : $(OBJECTS)
@@ -89,10 +94,15 @@ main.elf : $(OBJECTS)
 main.bin : main.elf
 	${OC} -O binary main.elf main.bin
 
-all : main.bin
+all : main.bin dependencies
 
 clean :
 	${RM} -r ${OBJ_DIR} ${BIN_DIR}
+
+clean_dependencies :
+	@for d in $(DEPS); do \
+		$(MAKE) -C $(DEPS_DIR)/$$d clean; \
+	done
 
 # upload command to upload the code to the microcontroller
 upload :
