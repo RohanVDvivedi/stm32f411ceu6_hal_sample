@@ -79,22 +79,26 @@ ${OBJ_DIR} :
 	${MK} $@
 
 # generate objects from c sources
-%.o : %.c
+${OBJ_DIR}/%.o : ${SRC_DIR}/%.c | ${OBJ_DIR}
 	${CC} $(CCFLAGS) -c $< -o $@
 
 # generate objects from asm sources
-%.o : %.S
+${OBJ_DIR}/%.o : ${SRC_DIR}/%.S | ${OBJ_DIR}
 	${CC} $(CCFLAGS) -c $< -o $@
 
+# rule to make the directory for storing elf and bin files, that we create
+${BIN_DIR} :
+	${MK} $@
+
 # generate final elf by linking all the object files
-main.elf : $(OBJECTS)
+${BIN_DIR}/main.elf : $(OBJECTS) | ${BIN_DIR}
 	$(LD) $(ARCH_FLAGS) $(LDFLAGS) $(USE_NOHOST) $^ -o $@ $(LIB)
 
 # convert to hex or binary that can be transfered by the corresponding uploader driver
-main.bin : main.elf
-	${OC} -O binary main.elf main.bin
+${BIN_DIR}/%.bin : ${BIN_DIR}/%.elf
+	${OC} -O binary $< $@
 
-all : main.bin dependencies
+all : ${BIN_DIR}/main.bin dependencies
 
 clean :
 	${RM} -r ${OBJ_DIR} ${BIN_DIR}
