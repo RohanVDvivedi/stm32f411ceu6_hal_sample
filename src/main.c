@@ -5,7 +5,14 @@
 
 void SysTick_Handler(void)
 {
-  HAL_IncTick();
+	HAL_IncTick();
+}
+
+UART_HandleTypeDef huart2;
+
+void USART2_IRQHandler(void)
+{
+	HAL_UART_IRQHandler(&huart2);
 }
 
 static void SystemClock_Config(void);
@@ -23,7 +30,6 @@ int main(void)
 	GPIO_Init();
 
 	// setup UART at baud of 115200
-	UART_HandleTypeDef huart2;
 	UART2_Init(&huart2);
 
 	uint32_t delay_ms = 2000;
@@ -50,47 +56,47 @@ int main(void)
 
 static void SystemClock_Config(void)
 {
-    RCC_OscInitTypeDef osc = {0};
-    RCC_ClkInitTypeDef clk = {0};
+	RCC_OscInitTypeDef osc = {0};
+	RCC_ClkInitTypeDef clk = {0};
 
-    // Enable power control clock
-    __HAL_RCC_PWR_CLK_ENABLE();
+	// Enable power control clock
+	__HAL_RCC_PWR_CLK_ENABLE();
 
-    // Configure voltage scaling for max frequency
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+	// Configure voltage scaling for max frequency
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    // HSE + PLL @ 100 MHz
-    osc.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    osc.HSEState       = RCC_HSE_ON;
-    osc.PLL.PLLState   = RCC_PLL_ON;
-    osc.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
-    osc.PLL.PLLM       = 25;
-    osc.PLL.PLLN       = 400;
-    osc.PLL.PLLP       = RCC_PLLP_DIV4;   // 100 MHz
-    osc.PLL.PLLQ       = 8;
+	// HSE + PLL @ 100 MHz
+	osc.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+	osc.HSEState       = RCC_HSE_ON;
+	osc.PLL.PLLState   = RCC_PLL_ON;
+	osc.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
+	osc.PLL.PLLM       = 25;
+	osc.PLL.PLLN       = 400;
+	osc.PLL.PLLP       = RCC_PLLP_DIV4;   // 100 MHz
+	osc.PLL.PLLQ       = 8;
 
-    if (HAL_RCC_OscConfig(&osc) != HAL_OK)
-    {
-        __disable_irq();
-        while (1);
-    }
+	if (HAL_RCC_OscConfig(&osc) != HAL_OK)
+	{
+		__disable_irq();
+		while (1);
+	}
 
-    // Bus clocks
-    clk.ClockType = RCC_CLOCKTYPE_SYSCLK |
-                    RCC_CLOCKTYPE_HCLK   |
-                    RCC_CLOCKTYPE_PCLK1  |
-                    RCC_CLOCKTYPE_PCLK2;
+	// Bus clocks
+	clk.ClockType = RCC_CLOCKTYPE_SYSCLK |
+					RCC_CLOCKTYPE_HCLK   |
+					RCC_CLOCKTYPE_PCLK1  |
+					RCC_CLOCKTYPE_PCLK2;
 
-    clk.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
-    clk.AHBCLKDivider  = RCC_SYSCLK_DIV1;
-    clk.APB1CLKDivider = RCC_HCLK_DIV2;   // max 50 MHz
-    clk.APB2CLKDivider = RCC_HCLK_DIV1;   // max 100 MHz
+	clk.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+	clk.AHBCLKDivider  = RCC_SYSCLK_DIV1;
+	clk.APB1CLKDivider = RCC_HCLK_DIV2;   // max 50 MHz
+	clk.APB2CLKDivider = RCC_HCLK_DIV1;   // max 100 MHz
 
-    if (HAL_RCC_ClockConfig(&clk, FLASH_ACR_LATENCY_3WS) != HAL_OK)
-    {
-        __disable_irq();
-        while (1);
-    }
+	if (HAL_RCC_ClockConfig(&clk, FLASH_ACR_LATENCY_3WS) != HAL_OK)
+	{
+		__disable_irq();
+		while (1);
+	}
 }
 
 /* ---------------- GPIO ---------------- */
@@ -133,4 +139,7 @@ static void UART2_Init(UART_HandleTypeDef* huart2)
 	huart2->Init.OverSampling = UART_OVERSAMPLING_16;
 
 	HAL_UART_Init(huart2);
+
+	HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(USART2_IRQn);
 }
