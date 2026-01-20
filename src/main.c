@@ -42,7 +42,7 @@ int main(void)
 		print_hello_world_from_uart(&huart2);
 
 		// diminishing delay by a fraction of 0.93, and reset delay if the delay is lesser than 10 ms
-		float new_delay_ms = (float)(delay_ms * 0.93f);
+		float new_delay_ms = (float)(delay_ms * 0.8f);
 		if (new_delay_ms < 70.5)
 			delay_ms = 2000;
 		else
