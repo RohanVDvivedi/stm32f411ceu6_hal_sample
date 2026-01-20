@@ -17,7 +17,7 @@ A sample project to show how to build a modular STM32 HAL-supported application 
  * `make dependencies` *only when you modify a dependency*
  * `make all` *only when you modify the project source*
 
-**Install from the build :**
+**Upload the build to the board :**
  * `make upload` or `make upload-using-uart`
  * ***you may discard the build by*** `make clean`
 
