@@ -8,7 +8,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
 }
 
-//static void SystemClock_Config(void);
+static void SystemClock_Config(void);
 static void GPIO_Init(void);
 static void UART2_Init(UART_HandleTypeDef* huart2);
 
@@ -17,7 +17,7 @@ int main(void)
 	HAL_Init();
 
 	// setup clock to run at highest frequency
-	//SystemClock_Config();
+	SystemClock_Config();
 
 	// setup LED pin as output
 	GPIO_Init();
@@ -48,7 +48,7 @@ int main(void)
 
 /* ---------------- clock ---------------- */
 
-/*static void SystemClock_Config(void)
+static void SystemClock_Config(void)
 {
     RCC_OscInitTypeDef osc = {0};
     RCC_ClkInitTypeDef clk = {0};
@@ -64,10 +64,10 @@ int main(void)
     osc.HSEState       = RCC_HSE_ON;
     osc.PLL.PLLState   = RCC_PLL_ON;
     osc.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
-    osc.PLL.PLLM       = 8;
+    osc.PLL.PLLM       = 25;
     osc.PLL.PLLN       = 400;
     osc.PLL.PLLP       = RCC_PLLP_DIV4;   // 100 MHz
-    osc.PLL.PLLQ       = 7;               // USB safe if needed
+    osc.PLL.PLLQ       = 8;
 
     if (HAL_RCC_OscConfig(&osc) != HAL_OK)
     {
@@ -91,7 +91,7 @@ int main(void)
         __disable_irq();
         while (1);
     }
-}*/
+}
 
 /* ---------------- GPIO ---------------- */
 
