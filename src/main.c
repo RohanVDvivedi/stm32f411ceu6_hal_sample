@@ -3,6 +3,11 @@
 
 #include<hello_world_from_uart.h>
 
+void SysTick_Handler(void)
+{
+  HAL_IncTick();
+}
+
 //static void SystemClock_Config(void);
 static void GPIO_Init(void);
 static void UART2_Init(UART_HandleTypeDef* huart2);
@@ -10,7 +15,6 @@ static void UART2_Init(UART_HandleTypeDef* huart2);
 int main(void)
 {
 	HAL_Init();
-	HAL_InitTick(TICK_INT_PRIORITY);
 
 	// setup clock to run at highest frequency
 	//SystemClock_Config();
@@ -22,7 +26,7 @@ int main(void)
 	UART_HandleTypeDef huart2;
 	UART2_Init(&huart2);
 
-	//uint32_t delay_ms = 1000;
+	uint32_t delay_ms = 2000;
 	while(1)
 	{
 		// toggle LED
@@ -32,13 +36,13 @@ int main(void)
 		print_hello_world_from_uart(&huart2);
 
 		// diminishing delay by a fraction of 0.93, and reset delay if the delay is lesser than 10 ms
-		/*delay_ms = (uint32_t)(delay_ms * 0.93f);
-		if (delay_ms < 70)
-			delay_ms = 3000;*/
+		float new_delay_ms = (float)(delay_ms * 0.93f);
+		if (new_delay_ms < 70.5)
+			delay_ms = 2000;
+		else
+			delay_ms = new_delay_ms;
 
-		//HAL_Delay(delay_ms);
-		for(volatile int i = 0 ; i < 500000; i++)
-			__asm volatile ("nop");
+		HAL_Delay(delay_ms);
 	}
 }
 
@@ -129,28 +133,4 @@ static void UART2_Init(UART_HandleTypeDef* huart2)
 	huart2->Init.OverSampling = UART_OVERSAMPLING_16;
 
 	HAL_UART_Init(huart2);
-}
-
-void SysTick_Handler(void)
-{
-  HAL_IncTick();
-}
-
-HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
-{
-  if (SysTick_Config(SystemCoreClock / 1000U))
-    return HAL_ERROR;
-
-  HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority, 0);
-  return HAL_OK;
-}
-
-void HAL_SuspendTick(void)
-{
-  SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
-}
-
-void HAL_ResumeTick(void)
-{
-  SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 }
