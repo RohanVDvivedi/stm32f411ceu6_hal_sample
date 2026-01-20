@@ -54,11 +54,22 @@ SECTIONS
 	.heap :
 	{
 	  . = ALIGN(8);
+	  _heap_start = .;
 	  /* Newlib expects 'end' symbol for sbrk */
     end = .;   /* start of heap */
+	  . = . + 32k;
+	  . = ALIGN(8);
+	  _heap_end = .;
 	} > RAM
 
-	_estack = ORIGIN(RAM) + LENGTH(RAM);
+	.stack :
+	{
+	  . = ALIGN(8);
+	  _sstack = .;
+	  . = ALIGN(8);
+	  . = ORIGIN(RAM) + LENGTH(RAM);
+	  _estack = .;
+	} > RAM
 	PROVIDE(__stack = _estack);
 }
 
