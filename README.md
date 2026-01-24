@@ -21,3 +21,5 @@ A sample project to show how to build a modular STM32 HAL-supported application 
  * `make upload` or `make upload-using-uart`
  * ***you may discard the build by*** `make clean`
 
+### resources
+ * [STM32F411 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
